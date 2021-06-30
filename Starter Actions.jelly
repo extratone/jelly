@@ -1,0 +1,8 @@
+import Shortcuts 1092.6
+#Color: red, #Icon: shortcuts
+
+if(Shortcut Input.as[text] .contains "Hello World") {
+  quickLook(Shortcut Input)
+} else {
+  sendNotification(body: "Invalid Shortcut Input")
+}

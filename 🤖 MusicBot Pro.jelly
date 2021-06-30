@@ -1,0 +1,1131 @@
+import Shortcuts 1092.9.13.2
+#Color: yellow,#Icon: headphones
+
+continueInShortcuts()
+text() >> text
+text() >> text
+text() >> text
+text() >> text
+number(value: 3) >> number
+text() >> text
+if( != nil "music.apple.com") {
+	getType(input: Shortcut Input) >> getType
+	if( == "URL") {
+		getURLSFromInput(text: "${Shortcut Input}") >> getURLSFromInput
+		expandURL(url: "${URLs}") >> expandURL
+		if( .contains "music.apple.com") {
+{			dictionary("⭐️ Save Favorite":"FavoriteAlbums.json","🔥 Save New Music Release":"NewReleases.json","🔗 Share Streaming Links":"SongLink","📆 Release Date":"Dates","↩️ Go Back":"↩️ Go Back")}
+			keysFrom(dictionary: MusicBot Actions Dictionary) >> keysFrom
+			choose(list: Dictionary Value, prompt: "MusicBot Pro Actions") >> choose
+			keysFrom(dictionary: MusicBot Actions Dictionary) >> keysFrom
+			text(text: "${Dictionary Value}") >> Dict Value
+			if( .contains ".json") {
+{				dictionary("FavoriteAlbums.json":"favorites","NewReleases.json":"new music releases")}
+				getFile(picker: false, path: "${Dict Value}", error: false) >> getFile
+				if( == nil $2) {
+					alert(alert: "The database file required for this shortcut is missing from iCloud Drive.
+
+Tap 'OK' to create the file and continue.
+
+You will only be asked to create this file once.", title: "❌ Missing Database ❌")
+					text(text: "{ "releases": []}") >> text
+					setName(input: Text, name: "${Dict Value}") >> setName
+					saveFile(input: Renamed Item, ask: false, path: "", overwrite: true) >> saveFile
+				} else {
+					nothing()
+				} >> If Result
+				getFile(picker: false, path: "${Dict Value}") >> getFile
+				getDictionaryFrom(input: File) >> getDictionaryFrom
+				text(text: "${Release URL.as(URL)}") >> text
+				getURLSFromInput(text: "${Text}") >> getURLSFromInput
+				continueInShortcuts()
+				if( .contains "/playlist/") {
+					matchText(text: "${URLs}", regex: "https\:\/\/music\.apple\.com\/.+\d+\?i=(\d+)", caseSensitive: false) >> Matched URL
+					getMatchGroup(matches: Matched URL) >> Single ID
+					text(text: "Single") >> text
+					if( == nil $2) {
+						matchText(text: "${URLs}", regex: "https\:\/\/music\.apple\.com\/.+\/(\d+)") >> Matched URL
+						getMatchGroup(matches: Matched URL) >> Matched Album ID
+						text(text: "Album") >> text
+					} else {
+					} >> If Result
+					searchItunes(query: "${Release ID}", by: Product ID) >> searchItunes
+					downloadURL(url: "${Artwork URL}") >> downloadURL
+					resizeImage(image: Contents of URL, width: 123) >> resizeImage
+					decode(input: Resized Image) >> decode
+				} else {
+					text(text: "Playlist") >> text
+					matchText(text: "${URLs}", regex: "https\:\/\/music\.apple\.com\/.+pl\.(.+)") >> matchText
+					getMatchGroup(matches: Matches) >> getMatchGroup
+					text(text: "pl.${Text}") >> Playlist ID
+					if( == nil $2) {
+						alert(alert: "A playlist matching this ID couldn't be found on the Apple Music online catalog.", title: "❌ Error ❌", cancel: false)
+						exit()
+					} else {
+						downloadURL(url: "${Playlist Results.get(Artwork (Medium) URL)}") >> downloadURL
+						resizeImage(image: Contents of URL, width: 123) >> resizeImage
+						decode(input: Resized Image) >> decode
+					} >> If Result
+				} >> If Result
+				keysFrom(dictionary: Database File) >> keysFrom
+				repeatEach(Dictionary Value) {
+					keysFrom(dictionary: Repeat Item) >> keysFrom
+					getTextFrom(input: Dictionary Value) >> getTextFrom
+					if( .contains ""${Release URL}"") {
+						text(text: "Yes") >> text
+					} else {
+						text(text: "${NewDicts}
+${Variable},") >> text
+					}
+				} >> Repeat Result
+				if( == "Yes") {
+					keysFrom(dictionary: Readable Name) >> keysFrom
+					showResult(text: "${Artist} by ${Variable} was already saved in your ${Name} before.")
+					exit()
+				} else {
+				}
+				text(text: "${Release URL}{"name":"${Variable}","url":"${Artist}","artist":"${Variable}","artwork":"${Artwork Encoded}","artworkEncoded":"${Variable}","saved":"${Current Date}","type":"${Release Type}"},") >> text
+				text(text: "{"releases":[${Text}]}") >> text
+				replaceText(input: "${Text}", find: ",\]\}$", replace: "]}", isRegex: true, caseSensitive: true) >> replaceText
+				setName(input: Updated Text, name: "${Dict Value}") >> setName
+				saveFile(input: Renamed Item, ask: false, path: "", overwrite: true) >> saveFile
+				if( .contains "NewReleases") {
+				} else {
+				} >> If Result
+				keysFrom(dictionary: Readable Name) >> Database
+				text(text: "${Name} by ${Variable} saved to your ${Database}.") >> text
+				showResult(text: "${Text}")
+				exit()
+			} else {
+				if( .contains "Dates") {
+					if( .contains "/playlist") {
+						alert(alert: "You passed a playlist to MusicBot Pro. Release dates for playlists are not supported.", title: "❌ Error ❌", cancel: false)
+						exit()
+					} else {
+						matchText(text: "${Expanded URL}", regex: "https\:\/\/music\.apple\.com\/.+\d+\?i=(\d+)") >> matchText
+						getMatchGroup(matches: Matches) >> getMatchGroup
+						if( != nil $2) {
+							text(text: "single") >> text
+						} else {
+							matchText(text: "${Expanded URL}", regex: "https\:\/\/music\.apple\.com\/.+\/(\d+)") >> matchText
+							getMatchGroup(matches: Matches) >> getMatchGroup
+							text(text: "album") >> text
+						} >> If Result
+						if( == "single") {
+							date(date: "${Song Results.get(Release Date)}") >> date
+							if( != nil $2) {
+								text(text: "${Song Results.get(Name)} by ${ActionOutput.get(Name)}") >> text
+							} else {
+								alert(alert: "No release date was found for ${Song Results.get(Artist)} by ${ActionOutput.get(Artist)}.", title: "❌ Error ❌", cancel: false)
+								exit()
+							} >> If Result
+						} else {
+							date(date: "${Albums Results.get(Release Date)}") >> date
+							if( != nil $2) {
+								text(text: "${Albums Results.get(Name)} by ${ActionOutput.get(Name)}") >> text
+							} else {
+								alert(alert: "No release date was found for ${Albums Results.get(Artist)} by ${ActionOutput.get(Artist)}.", title: "❌ Error ❌", cancel: false)
+								exit()
+							}
+						}
+					} >> If Result
+					if( false $2) {
+						text(text: "came out")
+					} else {
+						text(text: "is coming out")
+					} >> If Result
+					text(text: "${Release Date Summary} ${Variable} on ${If Result}.") >> text
+					alert(alert: "${Text}", title: "📆 Release Date 📆", cancel: false)
+					if( > $2) {
+						menu(, [Yes, Create Event, No, Exit]) {
+						case("Yes, Create Event"):
+							showResult(text: "'${New Event.get(Title)}' event created successfully.")
+							exit()
+						case("No, Exit"):
+							exit()
+						}
+					} else {
+						nothing()
+					}
+					exit()
+				} else {
+					if( .contains "SongLink") {
+						url(url: "https://api.song.link/v1-alpha.1/links?url=${Expanded URL}") >> url
+						downloadURL(url: "${URL}") >> downloadURL
+						getDictionaryFrom(input: Contents of URL) >> getDictionaryFrom
+						if( != nil $2) {
+							keysFrom(dictionary: SongLink Response) >> Entries by ID
+							keysFrom(dictionary: Entries by ID) >> keysFrom
+							repeatEach(Dictionary Value) {
+								text(text: "${Repeat Item}") >> text
+								if( .contains "ITUNES") {
+									keysFrom(dictionary: Entries by ID) >> keysFrom
+									text(text: "${Expanded URL} by ${ActionOutput}
+
+Music: ${Dictionary Value.as(Dictionary).key(title)}
+") >> text
+								} else {
+								}
+							} >> Repeat Result
+{							dictionary("Spotify":"spotify","YouTube":"youtube","YouTube Music":"youtubeMusic","Amazon Music":"amazonMusic","Tidal":"tidal","Deezer":"deezer","Pandora":"pandora")}
+							keysFrom(dictionary: Dictionary) >> keysFrom
+							choose(list: Dictionary Value, prompt: "Pick Additional Streaming Services", multiple: true) >> choose
+							repeatEach(Chosen Item) {
+								keysFrom(dictionary: Dictionary) >> keysFrom
+								keysFrom(dictionary: SongLink Response) >> Service URL
+								text(text: "${Repeat Item}: ${Variable}
+") >> text
+							} >> Repeat Result
+							combineText(text: Song Share Info) >> combineText
+							share(file: Combined Text)
+						} else {
+							alert(alert: "MusicBot couldn't fetch other streaming links for this item.", title: "❌ Error ❌", cancel: false)
+							exit()
+						}
+					} else {
+						if( .contains "↩️ Go Back") {
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						} else {
+						}
+					}
+				}
+			}
+		} else {
+		} >> If Result
+	} else {
+		menu(Playback Options, [▶️ Play Now, 🔀 Shuffle, ➡️ Play Next, ↘️ Play Later, ↕️ Play with Reverse Order]) {
+		case("▶️ Play Now"):
+			playMusic(music: Shortcut Input, shuffle: Off)
+			text(text: "${Shortcut Input.as(iMedia).get(Title)}") >> text
+			text(text: "Now playing") >> text
+		case("🔀 Shuffle"):
+			playMusic(music: Shortcut Input, shuffle: Songs, repeat: None)
+			text(text: "") >> text
+			text(text: "Now playing on shuffle") >> text
+		case("➡️ Play Next"):
+			addToPlaylist()
+			text(text: "${Shortcut Input.as(iMedia).get(Title)}") >> text
+			text(text: "Playing next") >> text
+		case("↘️ Play Later"):
+			addToPlaylist()
+			text(text: "${Shortcut Input.as(iMedia).get(Title)}") >> text
+			text(text: "Playing later") >> text
+		case("↕️ Play with Reverse Order"):
+			count(input: Shortcut Input) >> count
+			getItemFromList(list: Shortcut Input, type: Last Item) >> getItemFromList
+			repeatEach(Shortcut Input) {
+				math(input: Count, operation: -, operand: Repeat Index) >> math
+				if( != 0) {
+					getItemFromList(list: Shortcut Input, type: Item At Index, index: Calculation Result) >> getItemFromList
+				} else {
+				} >> If Result
+			} >> Repeat Result
+			playMusic(music: Backward Play, shuffle: Off, repeat: None)
+			text(text: "") >> text
+			text(text: "Now playing in reverse, starting with: ${Item from List.as(iMedia).get(Title)}") >> text
+		} >> Menu Result
+		sendNotification(body: "${Queue Status}", title: "${Notification Title}", sound: false)
+		runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+	} >> If Result
+} else {
+text(|"""🤖
+MusicBot Pro, Your Apple Music Assistant"""|)
+	menu(, [) {
+	case("⚙️ Utilities & Queue"):
+		deviceDetails(detail: Current Volume) >> deviceDetails
+		math(input: Current Volume, operation: *, operand: "100") >> math
+		round(number: Calculation Result) >> round
+		menu(MusicBot Pro Utilities, [) {
+		case("🧹 Clear Up Next"):
+			alert(alert: "Are you sure? This will clear your Up Next queue.", title: "❌ Clear Up Next ❌")
+			clearUpNext()
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		case("🔉 Set Volume (Current: Rounded Number%)"):
+			menu(, [🔉 Set Volume, ↩️ Go Back]) {
+			case("🔉 Set Volume"):
+				setVolume(level: Ask)
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+			case("↩️ Go Back"):
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+			} >> Menu Result
+		case("🎧 Set Playback Device"):
+			setMediaDestination(device: Ask)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		case("➡️ Hand Off to Speaker"):
+			handoffPlayback(source: $0, route: Ask)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		case("↗️ Open Current Song in Music"):
+			getCurrentSong() >> getCurrentSong
+			if( == nil $2) {
+				alert(alert: "No song is currently playing. Running MusicBot Pro again...
+", title: "❌ Error ❌", cancel: false)
+				exit()
+			} else {
+				if( != nil $2) {
+					openURL(url: Song Results)
+				} else {
+					alert(alert: "Couldn't get a link to ${Current Song.get(Artist)} by ${ActionOutput.get(Artist)}. Running MusicBot Pro again...", title: "❌ Error ❌", cancel: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} >> If Result
+			} >> If Result
+		case("⬇️ Add Current Song to Library"):
+			getCurrentSong() >> getCurrentSong
+			if( == nil $2) {
+				alert(alert: "No song is currently playing. Running MusicBot Pro again...", title: "❌ Exit ❌", cancel: false)
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				if( != nil $2) {
+					sendNotification(body: "${Current Song.get(Artist)} by ${ActionOutput.get(Artist)} added to your library.", title: "✅ Song Added ✅", sound: false, attachment: Song Results)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					alert(alert: "Couldn't get a link to ${Current Song.get(Artist)} by ${ActionOutput.get(Artist)}. Running MusicBot Pro again...", title: "❌ Error ❌", cancel: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				}
+			}
+		case("📋 Save Link from Clipboard"):
+			expandURL(url: "${Clipboard}") >> expandURL
+			if( .contains "music.apple.com") {
+				runShortcut(name: "🤖 MusicBot Pro", input: Expanded URL, show: false)
+			} else {
+				alert(alert: "You don't have an Apple Music link in the clipboard. MusicBot Pro only supports music.apple.com links.", title: "❌ No Link Found ❌", cancel: false)
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			}
+		case("🔶 Manage Releases and Favorites"):
+{			dictionary("⭐️ Favorites":"FavoriteAlbums.json","🔥 New Releases":"NewReleases.json","↩️ Go Back":"Back")}
+			keysFrom(dictionary: Dictionary) >> keysFrom
+			choose(list: Dictionary Value, prompt: "Manage Releases For...") >> choose
+			text(text: "${Chosen Item}") >> text
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				nothing()
+			} >> If Result
+			keysFrom(dictionary: Dictionary) >> keysFrom
+			text(text: "${Dictionary Value}") >> Database File
+			getFile(picker: false, path: "${Database File}", error: false) >> getFile
+			getDictionaryFrom(input: File) >> Main Dictionary
+			if( == nil $2) {
+				alert(alert: "The database file required for this feature is missing from iCloud Drive.
+
+Tap 'OK' to create the file and continue.
+
+You will only be asked to create this file once.", title: "❌ Missing Database File ❌")
+				text(text: "{ "releases": []}") >> text
+				setName(input: Text, name: "${Database File}") >> setName
+				saveFile(input: Renamed Item, ask: false, overwrite: true)
+				alert(alert: "The database file has been created. You can add new music releases or favorite albums by sharing from Apple Music to MusicBot via the share sheet.", title: "Database Created")
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				nothing()
+			} >> If Result
+			keysFrom(dictionary: Main Dictionary) >> keysFrom
+			repeatEach(Dictionary Value) {
+				text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:${Repeat Item.as(Dictionary).key(artist)};;;;ORG:${Variable.as(Dictionary).key(artist)};URL:${Repeat Item.as(Dictionary).key(artworkEncoded)}PHOTO;ENCODING=b:${Variable.as(Dictionary).key(artworkEncoded)}END:VCARD") >> text
+			} >> Repeat Result
+			combineText(text: Repeat Results) >> combineText
+			text(text: "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") >> text
+			text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:↩️ Go Back;;;;ORG:Run MusicBot Manager Again;PHOTO;ENCODING=b:${Text}END:VCARD") >> text
+			combineText(text: ManagerVCards) >> combineText
+			setName(input: Combined Text, name: "Manager.vcf") >> setName
+			getContactsFrom(input: Renamed Item) >> getContactsFrom
+			choose(list: Contacts, prompt: "❌ Remove Item ❌") >> choose
+			getURLSFromInput(text: "${Chosen Item}") >> getURLSFromInput
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				repeatEach(Dictionary Value) {
+					keysFrom(dictionary: Repeat Item) >> keysFrom
+					getTextFrom(input: Dictionary Value) >> getTextFrom
+					if( == ""${URLs}"") {
+						text(text: "Yes") >> text
+						text(text: "${Repeat Item.as(Dictionary).key(artist)} by ${Variable.as(Dictionary).key(artist)} has been removed.") >> text
+					} else {
+						text(text: "${Manager New Dicts}
+${Variable},") >> text
+					}
+				}
+				text(text: "{ "releases": [${Manager New Dicts}]}") >> text
+				replaceText(input: "${Text}", find: ",\]\}$", replace: "]}", isRegex: true) >> replaceText
+				setName(input: Updated Text, name: "${Database File}") >> setName
+				saveFile(input: Renamed Item, ask: false, overwrite: true) >> saveFile
+				if( .contains "NewReleases") {
+				}
+			} >> If Result
+			if( != nil $2) {
+				alert(alert: "${Manager Removed Item}", title: "Item Removed", cancel: false)
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+			}
+		case("↩️ Go Back"):
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		} >> Menu Result
+	case("⏸ Pause"):
+		play(behavior: Pause)
+	case("⏸ Pause Speakers"):
+		play(behavior: Pause, source: $1)
+		play(behavior: Pause, source: $1)
+		play(behavior: Pause, source: $1)
+	case("❤️ Rate Song"):
+		getCurrentSong() >> getCurrentSong
+		if( != nil $2) {
+			choose(list: Rate, prompt: "Rate '${Current Song.get(Title)}'") >> choose
+			if( .contains "Love") {
+				sendNotification(body: "${Song Results.get(Name)} by ${ActionOutput.get(Name)}", title: "❤️ Song Loved ❤️", sound: false, attachment: $3)
+			} else {
+				sendNotification(body: "${Song Results.get(Name)} by ${ActionOutput.get(Name)}", title: "💔 Song Disliked 💔", sound: false, attachment: $3)
+			} >> If Result
+		} else {
+		} >> If Result
+	case("⚡️ Smart Mixes"):
+		menu(Pick a Smart Mix, [⚛️ Genius Mix (Shuffled), 🎸 Songs: Recently Played, 🗂 Albums: Recently Played, 🕒 Recently Added, 📈 Top of the Year, 📻 Songs by Decade (Shuffled), 🕵️ Rediscover Lost Songs (Shuffled), ↩️ Go Back]) {
+		case("⚛️ Genius Mix (Shuffled)"):
+			randomNumber(min: 2, max: 7) >> randomNumber
+			filterMusic() >> filterMusic
+			runShortcut(name: "🤖 MusicBot Pro", input: Music, show: false) >> runShortcut
+		case("🎸 Songs: Recently Played"):
+			text(text: "↩️ Go Back") >> text
+			filterMusic() >> filterMusic
+			choose(list: Recent Songs, prompt: "Recently Played Songs", multiple: true) >> choose
+			getTextFrom(input: Chosen Item) >> getTextFrom
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+			} else {
+				runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false) >> runShortcut
+			} >> If Result
+		case("🗂 Albums: Recently Played"):
+			text(text: "↩️ Go Back") >> text
+			filterMusic() >> filterMusic
+			filterMusic() >> filterMusic
+			repeatEach(Music) {
+				math(input: Repeat Index, operation: -, operand: "1") >> math
+				if( > 0) {
+					getItemFromList(list: Music, type: Item At Index, index: Calculation Result) >> getItemFromList
+					if( == ""${Item from List.as(iMedia).get(Album)}"") {
+					} else {
+						if( != ""${Item from List.as(iMedia).get(Artist)}"") {
+						} else {
+						} >> If Result
+					}
+				} else {
+				} >> If Result
+			} >> Repeat Result
+			choose(list: Recent Albums, prompt: "Recent Albums (Pick one to play whole album)", multiple: true) >> choose
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+			} else {
+				filterMusic() >> filterMusic
+				playMusic(music: Music)
+				getItemFromList(list: Music) >> getItemFromList
+				sendNotification(body: "Let's start with '${Item from List}'...", title: "Now Playing: ${Music.get(Album)}", sound: false)
+			} >> If Result
+		case("🕒 Recently Added"):
+			filterMusic() >> filterMusic
+			text(text: "↩️ Go Back") >> text
+			choose(list: Recently Added Songs, prompt: "Recently Added Songs", multiple: true) >> choose
+			text(text: "${Chosen Item}") >> text
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false)
+			}
+		case("📈 Top of the Year"):
+			adjustDate(operation: Get Start of Year, date: "${Current Date}") >> adjustDate
+			adjustDate(duration: , date: "${Year Start Date}") >> adjustDate
+			filterMusic() >> filterMusic
+			text(text: "↩️ Go Back") >> text
+			choose(list: Top of the Year, prompt: "Your Top Songs of ${Year Start Date} ", multiple: true) >> choose
+			text(text: "${Chosen Item}") >> text
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false)
+			}
+		case("📻 Songs by Decade (Shuffled)"):
+{			dictionary("60s":"1960","70s":"1970","80s":"1980","90s":"1990","00s":"2000","10s":"2010","20s":"2020")}
+			keysFrom(dictionary: Dictionary) >> keysFrom
+			choose(list: Dictionary Value, prompt: "Pick a Decade") >> choose
+			keysFrom(dictionary: Dictionary) >> Year
+			text(text: "January 1 ${Year} 12 AM") >> text
+			getDateFrom(input: Text) >> getDateFrom
+			math(input: Year, operand: "9") >> math
+			text(text: "December 31 ${Calculation Result} 11:59 PM") >> text
+			getDateFrom(input: Text) >> getDateFrom
+			filterMusic() >> filterMusic
+			filterMusic() >> filterMusic
+			runShortcut(name: "🤖 MusicBot Pro", input: Music, show: false) >> runShortcut
+		case("🕵️ Rediscover Lost Songs (Shuffled)"):
+			adjustDate(operation: Subtract, duration: , date: "${Current Date}") >> adjustDate
+			filterMusic() >> filterMusic
+			runShortcut(name: "🤖 MusicBot Pro", input: Music, show: false)
+		case("↩️ Go Back"):
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} >> Menu Result
+	case("🔥 New Releases"):
+		getFile(picker: false, path: "NewReleases.json", error: false) >> getFile
+		getDictionaryFrom(input: File) >> getDictionaryFrom
+		if( == nil $2) {
+			alert(alert: "Looks like you haven't saved any new releases to MusicBot yet.
+
+To save a new music release, just share it from Apple Music to MusicBot.", title: "❌ No New Releases ❌", cancel: false)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			nothing()
+		} >> If Result
+		keysFrom(dictionary: Dictionary) >> keysFrom
+		repeatEach(Dictionary Value) {
+			text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:${Repeat Item.as(Dictionary).key(type)};;;;ORG:${Variable.as(Dictionary).key(type)};URL:${Repeat Item.as(Dictionary).key(artworkEncoded)}
+NOTE:${Variable.as(Dictionary).key(artworkEncoded)}PHOTO;ENCODING=b:${Repeat Item.as(Dictionary).key(name)}END:VCARD") >> text
+		} >> Repeat Result
+		combineText(text: Repeat Results) >> combineText
+		text(text: "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") >> text
+		text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:↩️ Go Back;;;;ORG:Run MusicBot Again;PHOTO;ENCODING=b:${Text}END:VCARD") >> text
+		combineText(text: NewReleasesVCards) >> combineText
+		setName(input: Combined Text, name: "New Releases.vcf") >> setName
+		getContactsFrom(input: Renamed Item) >> getContactsFrom
+		choose(list: Contacts, prompt: "🔥 New Releases 🔥", mul: $3) >> choose
+		text(text: "${Chosen Item}") >> text
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		} else {
+			getURLSFromInput(text: "${Chosen Item}") >> getURLSFromInput
+			replaceText(input: "${URLs}", find: "^https", replace: "music", isRegex: true, caseSensitive: false) >> replaceText
+			openURL(url: Updated Text)
+		}
+	case("⭐️ Favorites"):
+		getFile(picker: false, path: "FavoriteAlbums.json", error: false) >> getFile
+		getDictionaryFrom(input: File) >> getDictionaryFrom
+		if( == nil $2) {
+			alert(alert: "Looks like you haven't saved any favorite albums to MusicBot yet.
+
+To save a new favorite album, just share it from Apple Music to MusicBot.", title: "❌ No Favorite Albums ❌", cancel: false)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			nothing()
+		} >> If Result
+		keysFrom(dictionary: Dictionary) >> keysFrom
+		repeatEach(Dictionary Value) {
+			text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:${Repeat Item.as(Dictionary).key(type)};;;;ORG:${Variable.as(Dictionary).key(type)};URL:${Repeat Item.as(Dictionary).key(artworkEncoded)}
+NOTE:${Variable.as(Dictionary).key(artworkEncoded)}PHOTO;ENCODING=b:${Repeat Item.as(Dictionary).key(name)}END:VCARD") >> text
+		} >> Repeat Result
+		combineText(text: Repeat Results) >> combineText
+		text(text: "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") >> text
+		text(text: "BEGIN:VCARDVERSION:3.0N;CHARSET=utf-8:↩️ Go Back;;;;ORG:Run MusicBot Again;PHOTO;ENCODING=b:${Text}END:VCARD") >> text
+		combineText(text: FavoriteAlbumsVCards) >> combineText
+		setName(input: Combined Text, name: "Albums.vcf") >> setName
+		getContactsFrom(input: Renamed Item) >> getContactsFrom
+		choose(list: Contacts, prompt: "⭐️ Favorites ⭐️", mul: $3) >> choose
+		text(text: "${Chosen Item}") >> text
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		} else {
+			if( == "Playlist") {
+				matchText(text: "${Chosen Item.get(URL)}", regex: "https\:\/\/music\.apple\.com\/.+(pl\..+)") >> matchText
+				getMatchGroup(matches: Matches) >> getMatchGroup
+				menu(, [▶️ Play, 🔀 Shuffle, ↗️ Open in Music, ↩️ Go Back]) {
+				case("▶️ Play"):
+					downloadURL(url: "${Playlist Results.get(Artwork (Medium) URL)}") >> downloadURL
+					getImagesFrom(input: Contents of URL) >> getImagesFrom
+					sendNotification(body: "${Playlist Results.get(Curator)} by ${ActionOutput.get(Curator)}", title: "▶️ Now Playing ▶️", sotachment: Images)
+				case("🔀 Shuffle"):
+					downloadURL(url: "${Playlist Results.get(Artwork (Medium) URL)}") >> downloadURL
+					getImagesFrom(input: Contents of URL) >> getImagesFrom
+					sendNotification(body: "${Playlist Results.get(Name)} by ${ActionOutput.get(Name)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: Images)
+				case("↗️ Open in Music"):
+					url(url: "${Chosen Item.get(URL)}") >> url
+					replaceText(input: "${URL}", find: "https", replace: "music") >> replaceText
+					openURL(url: Updated Text)
+				case("↩️ Go Back"):
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} >> Menu Result
+				exit()
+			} else {
+				text() >> text
+				filterMusic() >> filterMusic
+				repeatEach(Music) {
+					if( .contains ""${Repeat Item.as(Text)}"") {
+					} else {
+						text(text: "${Repeat Item}") >> text
+					} >> If Result
+				} >> Repeat Result
+				runShortcut(name: "🤖 MusicBot Pro", input: Songs to Play, show: false) >> runShortcut
+			} >> If Result
+		} >> If Result
+	case("📚 Genres"):
+		filterMusic() >> filterMusic
+		repeatEach(Music) {
+			musicDetail(detail: Genre, music: Repeat Item) >> musicDetail
+			if( .contains ""${Genre}"") {
+			} else {
+			} >> If Result
+		} >> Repeat Result
+		text(text: "↩️ Go Back") >> text
+		choose(list: Genres, prompt: "Most Played Genres in the Last ${Recent Filter} Months  ") >> Chosen Genre
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			filterMusic() >> filterMusic
+			menu(Choose Songs or Play Entire Genre?, [) {
+			case("Pick 'Chosen Genre' Songs"):
+				text(text: "↩️ Go Back") >> text
+				choose(list: Top Genre Songs, prompt: "Most Played ${Chosen Genre} Tracks in the Last ${ActionOutput} Months ", multiple: true) >> choose
+				text(text: "${Chosen Item}") >> text
+				if( .contains "↩️") {
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false)
+				} >> If Result
+			case("Play Genre"):
+				runShortcut(name: "🤖 MusicBot Pro", input: Top Genre Songs, show: false)
+			case("↩️ Go Back"):
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} >> Menu Result
+		} >> If Result
+	case("🧑‍🎤 Current Artist or Song"):
+		getCurrentSong() >> getCurrentSong
+		if( != nil $2) {
+			menu(, [) {
+			case("🔝 Most Played by Current Song (Artist)"):
+				filterMusic() >> filterMusic
+				text(text: "↩️ Go Back") >> text
+				choose(list: Top Songs by Artist, prompt: "Top Songs by ${Current Song.get(Artist)}", multiple: true) >> choose
+				text(text: "${Chosen Item}") >> text
+				if( .contains "↩️") {
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false)
+				}
+			case("🕒 Recently Played Songs by Current Song (Artist)"):
+				filterMusic() >> filterMusic
+				text(text: "↩️ Go Back") >> text
+				choose(list: Current Artist, prompt: "Other Songs by ${Recent Filter}  (played in the last ${Variable} months)", multiple: true) >> choose
+				text(text: "${Chosen Item}") >> text
+				if( .contains "↩️") {
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+				} else {
+					runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false) >> runShortcut
+				} >> If Result
+			case("🔀 Shuffle Songs by Current Song (Artist)"):
+				filterMusic() >> filterMusic
+				if( != nil $2) {
+					playMusic(music: Music, shuffle: Songs)
+					playMusic(music: Music, shuffle: Songs)
+					sendNotification(body: "Now shuffling songs by ${Current Song.get(Artist)}", title: "", sound: false)
+				} else {
+					alert(alert: "You don't have any other songs by ${Current Song.get(Artist)} in your Music library.", title: "❌ Error ❌", cancel: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				}
+			case("🌍 Album for 'Current Song'"):
+				sendNotification(body: "Fetching ${Current Song.get(Artist)} by ${ActionOutput.get(Artist)} from Apple Music...", title: "⚙️ Fetching Album ⚙️", sound: false, attachment: $3)
+				if( == nil $2) {
+					alert(alert: "No results found on the Apple Music catalog for ${Current Song.get(Artist)}  by ${ActionOutput.get(Artist)}. Running MusicBot Pro again...", title: "❌ Error ❌", cancel: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					nothing()
+				} >> If Result
+				repeatEach(Albums Results) {
+				}
+				text(text: "↩️") >> text
+				choose(list: Album for Current Song, prompt: "${Current Song.get(Album)}", multiple: false) >> choose
+				if( .contains "↩️") {
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					menu(Playback Options, [▶️ Play Album, 🔀 Shuffle Album, 👇 Pick Songs from Album, ➕ Add to Library, ↗️ Open in Music, ↩️ Go Back]) {
+					case("▶️ Play Album"):
+						sendNotification(body: "${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+					case("🔀 Shuffle Album"):
+						sendNotification(body: "${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+					case("👇 Pick Songs from Album"):
+						sendNotification(body: "Fetching songs from ${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+						repeatEach(Albums Results) {
+						}
+						choose(list: Pick Songs from Album, prompt: "${Menu Item Detail.get(Title)}", multiple: true) >> choose
+						repeatEach(Chosen Item) {
+							if( .contains "↩️") {
+								runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+							} else {
+							} >> If Result
+						} >> Repeat Result
+						menu(Playback Options, [▶️ Play, 🔀 Shuffle, ↩️ Go Back]) {
+						case("▶️ Play"):
+							sendNotification(body: "Started playback for these songs from ${Menu Item Detail.get(Title)}:
+
+${ActionOutput.get(Title)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+						case("🔀 Shuffle"):
+							sendNotification(body: "Now shuffling these songs from ${Titles of Songs to Play.as(Text)}:
+
+${Variable.as(Text)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+						case("↩️ Go Back"):
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						} >> Menu Result
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					case("➕ Add to Library"):
+						sendNotification(body: "${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: " ✅ Added to Library ✅", sound: false)
+						runShortcut(name: "🤖 MusicBot Pro", input: Menu Item Detail, show: false)
+					case("↗️ Open in Music"):
+						openURL(url: Albums Results)
+					case("↩️ Go Back"):
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					} >> Menu Result
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				}
+			case("🌎 Popular Songs by Current Song (Artist)"):
+				sendNotification(body: "Searching Apple Music for songs by ${Current Song.get(Artist)}...", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+				if( == nil $2) {
+					alert(alert: "Couldn't find any songs from ${Current Song.get(Artist)} on Apple Music. Running MusicBot Pro again...", title: "❌ Error ❌", cancel: false)
+					exit()
+				} else {
+					repeatEach(Song Results) {
+					}
+					choose(list: Popular Song Results, prompt: "Popular Songs by ${Current Song.get(Artist)} ", multiple: true) >> choose
+					repeatEach(Chosen Item) {
+						if( .contains "↩️") {
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						} else {
+						}
+					} >> Repeat Result
+					menu(Playback Options, [▶️ Play, 🔀 Shuffle, ➕ Add to Library, ↩️ Go Back]) {
+					case("▶️ Play"):
+						sendNotification(body: "Started playback for these songs by ${Current Song.get(Artist)}:
+
+${ActionOutput.get(Artist)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+					case("🔀 Shuffle"):
+						sendNotification(body: "Started shuffling these songs by ${Current Song.get(Artist)}:
+
+${ActionOutput.get(Artist)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+					case("➕ Add to Library"):
+						sendNotification(body: "Added these songs by ${Popular Song Titles} to your library:
+
+${Variable}", title: "✅ Added to Library ✅", sound: false)
+					case("↩️ Go Back"):
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					} >> Menu Result
+				}
+			case("↩️ Go Back"):
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			}
+		} else {
+			showResult(text: "No song is currently playing. Running MusicBot Pro again...")
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} >> If Result
+	case("🍎 Apple Mixes"):
+		adjustDate(operation: Get Start of Year, date: "${Current Date}") >> adjustDate
+		formatDate(date: "${Adjusted Date}", dStyle: Custom, custom: "yyyy") >> formatDate
+		math(input: Formatted Date, operation: -, operand: "1") >> Last Year
+		list(items: (
+        {
+        WFItemType = 0;
+        WFValue =         {
+            Value =             {
+                attachmentsByRange =                 {
+                    "{3, 1}" =                     {
+                        Type = Variable;
+                        VariableName = "Favorites Mix Name";
+                    };
+                };
+                string = "\U2b50\Ufe0f \Ufffc";
+            };
+            WFSerializationType = WFTextTokenString;
+        };
+    },
+    "\Ud83d\Udfe3 New Music Mix",
+    "\Ud83d\Udc86 Chill Mix",
+    "\Ud83d\Udc6f\U200d\U2640\Ufe0f Friends Mix",
+    "\Ud83d\Udcaa Get Up! Mix",
+        {
+        WFItemType = 0;
+        WFValue =         {
+            Value =             {
+                attachmentsByRange =                 {
+                    "{9, 1}" =                     {
+                        Aggrandizements =                         (
+                                                        {
+                                Type = WFDateFormatVariableAggrandizement;
+                                WFDateFormat = yyyy;
+                                WFDateFormatStyle = Custom;
+                                WFISO8601IncludeTime = 0;
+                            }
+                        );
+                        Type = CurrentDate;
+                    };
+                };
+                string = "\U23f3 Replay \Ufffc";
+            };
+            WFSerializationType = WFTextTokenString;
+        };
+    },
+        {
+        WFItemType = 0;
+        WFValue =         {
+            Value =             {
+                attachmentsByRange =                 {
+                    "{10, 1}" =                     {
+                        OutputName = "Calculation Result";
+                        OutputUUID = "C51EB277-6BC6-41A3-8F96-5DBE6EAB68DA";
+                        Type = ActionOutput;
+                    };
+                };
+                string = "\Ud83d\Udcc6 Replay \Ufffc";
+            };
+            WFSerializationType = WFTextTokenString;
+        };
+    },
+    "\U21a9\Ufe0f Go Back"
+)) >> list
+		choose(list: List, prompt: "Apple Mixes") >> choose
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		} else {
+			matchText(text: "${Chosen Item}", regex: "^.+?\s(.+)$") >> matchText
+			getMatchGroup(matches: Matches) >> getMatchGroup
+			if( .contains "Replay") {
+				getPlaylist(name: Apple Mix) >> getPlaylist
+				if( == nil $2) {
+					alert(alert: "Perhaps you haven't generated your Apple Music Replay mix yet.
+
+Continue to log into your Apple Music account and grab your Replay mixes for ${Current Date} or any previous year.", title: "❌ Replay Mix Not Found ❌", cancel: false)
+					openURL(url: "https://replay.music.apple.com/")
+					exit()
+				} else {
+					nothing()
+				}
+			} else {
+				nothing()
+			} >> If Result
+			getPlaylist(name: Apple Mix) >> getPlaylist
+			if( == nil $2) {
+				alert(alert: "No songs were found for the ${Apple Mix} playlist.
+
+Two possible reasons:
+
+1. You haven't added ${Variable} to your library. MusicBot can only fetch playlists from your library.
+
+2. Your device's language is not set to English and the playlist uses a different name.
+
+Double-check the playlist's status and run MusicBot again.", title: "❌ No Songs Found ❌", cancel: false)
+				exit()
+			} else {
+				menu(Playlist Options, [) {
+				case("🔎 Pick Songs"):
+					text(text: "↩️ Go Back") >> text
+					choose(list: Apple Mix Songs, prompt: "Songs From ${Apple Mix}", multiple: true) >> choose
+					text(text: "${Chosen Item}") >> text
+					if( .contains "↩️") {
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					} else {
+						runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false) >> runShortcut
+					} >> If Result
+				case("▶️ Play Entire Playlist"):
+					getPlaylist(name: Apple Mix) >> getPlaylist
+					playMusic(music: Playlist, shuffle: Off, repeat: None)
+					sendNotification(body: "Now playing: ${Apple Mix}", title: "MusicBot Playlists", sound: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+				case("🔀 Play Apple Mix on Shuffle"):
+					getPlaylist(name: Apple Mix) >> getPlaylist
+					playMusic(music: Playlist, shuffle: Songs)
+					sendNotification(body: "Now playing: ${Apple Mix} on shuffle", title: "MusicBot Playlists", sound: false)
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				case("↩️ Go Back"):
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} >> Menu Result
+			}
+		} >> If Result
+	case("🔀 Shuffle Playlist #1"):
+		getPlaylist(name: Playlist #1) >> Playlist #1
+		clearUpNext()
+		playMusic(music: Playlist #1, shuffle: Songs, repeat: None)
+		playMusic(music: Playlist #1, shuffle: Songs)
+		sendNotification(body: "Enjoy.", title: "Now Shuffing: ${Playlist #1}", sound: false)
+	case("🔀 Shuffle Playlist #2"):
+		getPlaylist(name: Playlist #2) >> Playlist #2
+		clearUpNext()
+		playMusic(music: Playlist #2, shuffle: Songs, repeat: None)
+		playMusic(music: Playlist #2, shuffle: Songs)
+		sendNotification(body: "Enjoy.", title: "Now Shuffling: ${Playlist #2}", sound: false)
+	case("🔀 Shuffle Playlist #3"):
+		getPlaylist(name: Playlist #3) >> Playlist #3
+		clearUpNext()
+		playMusic(music: Playlist, shuffle: Songs, repeat: None)
+		playMusic(music: Playlist, shuffle: Songs)
+		sendNotification(body: "Enjoy.", title: "Now Shuffling: ${Playlist #3}", sound: false)
+	case("🔎 Search and Play Song"):
+		askForInput(prompt: "What's the song name?") >> askForInput
+		sendNotification(body: "Getting results from Apple Music...", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+		if( != nil $2) {
+			repeatEach(Song Results) {
+			} >> Repeat Result
+			choose(list: Search Play Songs, prompt: "Songs") >> choose
+			if( == "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				nothing()
+			} >> If Result
+			sendNotification(body: "${Menu Item Detail.get(Title)} by ${ActionOutput.get(Title)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			alert(alert: "No results were found for '${Provided Input}'. Now running MusicBot Pro again...", title: "❌ Error ❌", cancel: false)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		}
+	case("⭕️ Pick a Playlist"):
+		getPlaylist(name: Ask) >> getPlaylist
+		runShortcut(name: "🤖 MusicBot Pro", input: Playlist, show: false)
+	case("🔍 Search Apple Music"):
+		askForInput(prompt: "Search Apple Music's Catalog", default: ) >> askForInput
+{		dictionary("Songs":{		dictionary("icon":"music.note","color":"#7C72FF","value":"songs")},"Albums":{		dictionary("icon":"square.stack","color":"#4DA0FA","value":"albums")},"Artists":{		dictionary("icon":"music.mic","color":"#F85B6D","value":"artists")},"Playlists":{		dictionary("icon":"music.note.list","color":"#E0618C","value":"playlists")})}
+		repeatEach(Dictionary) {
+			keysFrom(dictionary: Dictionary) >> keysFrom
+		} >> Repeat Result
+		choose(list: Catalog Search Types, prompt: "Search the Apple Music catalog for...") >> choose
+		if( == "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			nothing()
+		} >> If Result
+		if( == "Songs") {
+			sendNotification(body: "Getting songs from the Apple Music catalog...", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+			repeatEach(Song Results) {
+			} >> Repeat Result
+			choose(list: Catalog Results, prompt: "Song Results for '${Provided Input}'", multiple: true) >> choose
+			repeatEach(Chosen Item) {
+			} >> Repeat Result
+			menu(, [▶️ Play, ➕ Add to Library, ↗️ Open in Music, ↩️ Go Back]) {
+			case("▶️ Play"):
+				sendNotification(body: "${Menu Item Detail.get(Title)} by ${ActionOutput.get(Title)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+			case("➕ Add to Library"):
+				sendNotification(body: "${Menu Item Detail.get(Title)} by ${ActionOutput.get(Title)}", title: "✅ Song Added ✅", sound: false)
+			case("↗️ Open in Music"):
+				openURL(url: Menu Item Detail)
+			case("↩️ Go Back"):
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} >> Menu Result
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			if( == "Albums") {
+				sendNotification(body: "Getting albums from the Apple Music catalog...", title: "⚙️ Fetching Album ⚙️", sound: false, attachment: $3)
+				repeatEach(Albums Results) {
+				} >> Repeat Result
+				choose(list: Catalog Results, prompt: "Album Results for '${Provided Input}'") >> choose
+				if( == "↩️") {
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					menu(, [▶️ Play Album, 🔀 Shuffle Album, 👇 Pick Songs from Album, ➕ Add to Library, ↗️ Open in Music, ↩️ Go Back]) {
+					case("▶️ Play Album"):
+						sendNotification(body: "${Smart Artwork URL.get(Title)} by ${ActionOutput.get(Title)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+					case("🔀 Shuffle Album"):
+						sendNotification(body: "${Smart Artwork URL.get(Title)} by ${ActionOutput.get(Title)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+					case("👇 Pick Songs from Album"):
+						sendNotification(body: "Getting songs from the Apple Music catalog...", title: "⚙️ Fetching Album ⚙️", sound: false, attachment: $3)
+						repeatEach(Albums Results) {
+						}
+						choose(list: Album Result Songs to Pick, prompt: "${Smart Artwork URL.get(Title)}", multiple: true) >> choose
+						repeatEach(Chosen Item) {
+							if( == "↩️") {
+								runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+							} else {
+							} >> If Result
+						} >> Repeat Result
+						menu(Playback Options, [▶️ Play, 🔀 Shuffle, ↩️ Go Back]) {
+						case("▶️ Play"):
+							sendNotification(body: "Started playback for these songs from ${Titles of Songs to Play From Album Result}:
+
+${Variable}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+						case("🔀 Shuffle"):
+							sendNotification(body: "Now shuffling these songs from ${Titles of Songs to Play From Album Result}:
+
+${Variable}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+						case("↩️ Go Back"):
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						} >> Menu Result
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					case("➕ Add to Library"):
+						sendNotification(body: "${Smart Artwork URL.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "✅ Album Added ✅", sound: false)
+					case("↗️ Open in Music"):
+						openURL(url: Albums Results)
+					case("↩️ Go Back"):
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					} >> Menu Result
+				}
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				if( == "Playlists") {
+					sendNotification(body: "Getting playlists from the Apple Music catalog...", title: "⚙️ Fetching Playlists ⚙️", sound: false, attachment: $3)
+					repeatEach(Playlist Results) {
+					} >> Repeat Result
+					choose(list: Catalog Results, prompt: "Playlist Results for '${Provided Input}") >> choose
+					menu(, [▶️ Play, 🔀 Shuffle, 👇 Pick Songs from Playlist, ➕ Add to Library, ↗️ Open in Music, ↩️ Go Back]) {
+					case("▶️ Play"):
+						sendNotification(body: "${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+					case("🔀 Shuffle"):
+						sendNotification(body: "${Menu Item Detail.get(Subtitle)} by ${ActionOutput.get(Subtitle)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+					case("👇 Pick Songs from Playlist"):
+						sendNotification(body: "Getting songs from the Apple Music catalog...", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+						repeatEach(Playlist Results) {
+						}
+						choose(list: Songs from Playlist to Play, prompt: "${Menu Item Detail.get(Title)}", multiple: true) >> choose
+						repeatEach(Chosen Item) {
+							if( == "↩️") {
+								runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+							} else {
+							} >> If Result
+						} >> Repeat Result
+						menu(Playback Options, [▶️ Play, 🔀 Shuffle, ↩️ Go Back]) {
+						case("▶️ Play"):
+							sendNotification(body: "Started playback for these songs from ${Titles of Songs to Play from Playlist}:
+
+${Variable}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+						case("🔀 Shuffle"):
+							sendNotification(body: "Now shuffling these songs from ${Menu Item Detail.get(Title)}:
+
+${ActionOutput.get(Title)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+						case("↩️ Go Back"):
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						}
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					case("➕ Add to Library"):
+						sendNotification(body: "${Menu Item Detail.get(Title)} by ${ActionOutput.get(Title)}", title: "✅ Playlist Added ✅", sound: false)
+					case("↗️ Open in Music"):
+						openURL(url: Playlist Results)
+					case("↩️ Go Back"):
+						runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+					} >> Menu Result
+					runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+				} else {
+					if( == "Artists") {
+						sendNotification(body: "Getting artists from the Apple Music catalog...", title: "⚙️ Fetching Artists ⚙️", sound: false, attachment: $3)
+						repeatEach(Artist Results) {
+						} >> Repeat Result
+						choose(list: Catalog Results, prompt: "Artist Results for '${Provided Input}'") >> choose
+						if( == "↩️") {
+							runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+						} else {
+							menu(, [) {
+							case("🔝 Top Songs by Menu Item Detail (Title)"):
+								sendNotification(body: "Now fetching songs by ${Menu Item Detail.get(Title)} from Apple Music...", title: "⚙️ Fetching Songs ⚙️", sound: false, attachment: $3)
+								repeatEach(Song Results) {
+									if( == ""${Menu Item Detail.get(Title)}"") {
+									} else {
+										nothing()
+									} >> If Result
+								}
+								choose(list: Catalog Top Song Results, prompt: "Top Songs by ${Menu Item Detail.get(Title)}", multiple: true) >> choose
+								repeatEach(Chosen Item) {
+									if( == "↩️") {
+										runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+									} else {
+									} >> If Result
+								}
+								menu(Playback Options, [▶️ Play, 🔀 Shuffle, ➕ Add to Library, ↩️ Go Back]) {
+								case("▶️ Play"):
+									sendNotification(body: "Now playing these songs by ${Titles of Top Songs by Artist}:
+
+${Variable}", title: "▶️ Now Playing ▶️", sound: false, attachment: $3)
+									runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+								case("🔀 Shuffle"):
+									sendNotification(body: "Now shuffling these songs by ${Menu Item Detail.get(Title)}:
+
+${ActionOutput.get(Title)}", title: "🔀 Now Shuffling 🔀", sound: false, attachment: $3)
+									runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+								case("➕ Add to Library"):
+									sendNotification(body: "Added these songs by ${Titles of Top Songs by Artist} to your library:
+
+${Variable}", title: "✅ Songs Added ✅", sound: false)
+									runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+								case("↩️ Go Back"):
+									runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+								}
+							case("↗️ Open in Music"):
+								openURL(url: Menu Item Detail)
+							case("↩️ Go Back"):
+								runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+							}
+						}
+					} else {
+					}
+				}
+			}
+		} >> If Result
+	case("🎶 Search Library"):
+		askForInput(prompt: "Search Music Library") >> Search Query
+		menu(Search By..., [🎸 Song, 🧑‍🎤 Artist, ↩️ Go Back]) {
+		case("🎸 Song"):
+			filterMusic() >> filterMusic
+		case("🧑‍🎤 Artist"):
+			filterMusic() >> filterMusic
+		case("↩️ Go Back"):
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false) >> runShortcut
+		} >> Menu Result
+		if( == nil $2) {
+			alert(alert: "No matches were found for '${Provided Input}' in your library.", title: "❌ No Results Found ❌", cancel: false)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			text(text: "↩️ Go Back") >> text
+			choose(list: Search Results, prompt: "Results for '${Provided Input}'", multiple: true) >> choose
+			text(text: "${Chosen Item}") >> text
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				runShortcut(name: "🤖 MusicBot Pro", input: Chosen Item, show: false) >> runShortcut
+			} >> If Result
+		} >> If Result
+	case("➕ Add to Playlist"):
+		getCurrentSong() >> getCurrentSong
+		if( == nil $2) {
+			alert(alert: "No song is currently playing.", title: "❌ Error ❌", cancel: false)
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} >> If Result
+	case("📆 Upcoming Releases"):
+		if( == nil $2) {
+			alert(alert: "It looks like you didn't associate a calendar name with the 'Release Calendar Name' variable.
+
+You can find this variable toward the beginning of the shortcut. 
+
+Enter the name of the calendar where you save upcoming music releases in the Text action before it.", title: "❌ No Calendar Found ❌", cancel: false)
+			exit()
+		} else {
+			filterCalendar() >> filterCalendar
+			if( == nil $2) {
+				alert(alert: "Looks like the ${Release Calendar Name} calendar is empty.", title: "❌ No Events Found ❌", cancel: false)
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				text(text: "↩️ Go Back") >> text
+				choose(list: Upcoming Events, prompt: "${Release Calendar Name}") >> choose
+				text(text: "${Chosen Item}") >> text
+			} >> If Result
+			if( .contains "↩️") {
+				runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+			} else {
+				if( .contains "music.apple.com") {
+					replaceText(input: "${Chosen Item.as().get(URL)}", find: "https", replace: "music") >> replaceText
+					url(url: "${Updated Text}") >> url
+					openURL(url: URL)
+				} else {
+					showInCalendar(event: Chosen Item)
+				} >> If Result
+			} >> If Result
+		} >> If Result
+	case("📻 Beats 1"):
+{		dictionary("Beats 1 Live":"https://music.apple.com/us/station/beats-1/ra.978194965","Zane Lowe":"https://music.apple.com/us/curator/zane-lowe/990050553","Zane Lowe ⇾ NMD":"https://music.apple.com/us/curator/new-music-daily-with-zane-lowe/1458161472","Ebro Darden":"https://music.apple.com/us/curator/ebro-darden/990473683","Julie Adenuga":"https://music.apple.com/us/curator/julie-adenuga/993270508","Matt Wilkinson":"https://music.apple.com/us/curator/matt-wilkinson/1184566442","↩️ Go Back":"↩️ Go Back")}
+		keysFrom(dictionary: Dictionary) >> keysFrom
+		choose(list: Dictionary Value, prompt: "Pick a Radio Station") >> choose
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			keysFrom(dictionary: Dictionary) >> keysFrom
+			replaceText(input: "${Dictionary Value}", find: "^https", replace: "music", isRegex: true) >> replaceText
+			openURL(url: Updated Text)
+		} >> If Result
+	case("🏝 Ambient Sounds"):
+{		dictionary("🌳 Nature":"https://music.apple.com/us/playlist/nature-sounds/pl.040f99fdd83542a79b28fc4c13f773bd","⛈ Rain":"https://music.apple.com/us/playlist/rain-sounds/pl.e79d63bcaead407fb44a0c19380822e6","🌊 Ocean":"https://music.apple.com/us/playlist/ocean-sounds/pl.1321db8d70d64d389e9ffb9e875933fe","⚪️ White Noise":"https://music.apple.com/us/playlist/white-noise/pl.4a9b82ff3b2b4c97935434eb257b7cc3","↩️ Go Back":"↩️ Go Back")}
+		keysFrom(dictionary: Dictionary) >> keysFrom
+		choose(list: Dictionary Value, prompt: "Ambient Sounds") >> choose
+		text(text: "${Chosen Item}") >> text
+		if( .contains "↩️") {
+			runShortcut(name: "🤖 MusicBot Pro", ihow: false)
+		} else {
+			keysFrom(dictionary: Dictionary) >> keysFrom
+			replaceText(input: "${Dictionary Value}", find: "https", replace: "music") >> replaceText
+			openURL(url: Updated Text)
+		}
+	}
+} >> If Result
